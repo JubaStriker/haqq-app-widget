@@ -75,8 +75,7 @@ const useHABRStore = create((set, get) => ({
         icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/4642.png",
       };
 
-      const initData = await hashConnect.init(appMetadata, "testnet", false);
-      console.log("Init Data", initData);
+      const initData = await hashConnect.init(appMetadata, `${process.env.REACT_APP_HASHCONNECT_NETWORK}` , false);
 
       // let qrcode = ''
       // const ScanCode = await new AwesomeQR({
@@ -93,7 +92,7 @@ const useHABRStore = create((set, get) => ({
       // console.log(qrcode);
       // QR Code has been generated
       // need to display instead of loading spinner
-      hashConnect.findLocalWallets();
+      
 
       hashConnect.foundExtensionEvent.once((walletMetadata) => {
         hashConnect.connectToLocalWallet(
@@ -104,10 +103,8 @@ const useHABRStore = create((set, get) => ({
 
       let walletAccountID = "";
       hashConnect.pairingEvent.once((pairingData) => {
-        console.log("Paired Data: ", pairingData);
         pairingData.accountIds.forEach((id) => {
           walletAccountID = id;
-          console.log(walletAccountID);
         });
         set(
           produce((state) => ({
