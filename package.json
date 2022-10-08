@@ -11,7 +11,6 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
-    "awesome-qr": "^2.1.5-rc.0",
     "axios": "^0.26.1",
     "framer-motion": "^6.2.8",
     "hashconnect": "^0.2.3",

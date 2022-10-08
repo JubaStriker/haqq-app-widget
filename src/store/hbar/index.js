@@ -2,7 +2,7 @@ import create from "zustand";
 import produce from "immer";
 import { HashConnect } from "hashconnect";
 import { AccountId, HbarUnit, Hbar, TransferTransaction } from "@hashgraph/sdk";
-import { AwesomeQR } from "awesome-qr";
+// import { AwesomeQR } from "awesome-qr";
 import axios from "axios";
 
 const INITIAL_WALLET_STATE = {
@@ -78,20 +78,20 @@ const useHABRStore = create((set, get) => ({
       const initData = await hashConnect.init(appMetadata, "testnet", false);
       console.log("Init Data", initData);
 
-      let qrcode = ''
-      const ScanCode = await new AwesomeQR({
-        text: initData.pairingString,
-        size: 400,
-        margin: 16,
-        maskPattern: 110,
-        colorLight: "#fff",
-      }).draw().then((dataURL) => {
-        if(dataURL){
-          qrcode = dataURL.toString();
-        }
-      })
-      console.log(qrcode);
-      // QR Code has been generated 
+      // let qrcode = ''
+      // const ScanCode = await new AwesomeQR({
+      //   text: initData.pairingString,
+      //   size: 400,
+      //   margin: 16,
+      //   maskPattern: 110,
+      //   colorLight: "#fff",
+      // }).draw().then((dataURL) => {
+      //   if(dataURL){
+      //     qrcode = dataURL.toString();
+      //   }
+      // })
+      // console.log(qrcode);
+      // QR Code has been generated
       // need to display instead of loading spinner
       hashConnect.findLocalWallets();
 
@@ -101,7 +101,7 @@ const useHABRStore = create((set, get) => ({
           walletMetadata
         );
       });
-      
+
       let walletAccountID = "";
       hashConnect.pairingEvent.once((pairingData) => {
         console.log("Paired Data: ", pairingData);
@@ -153,7 +153,13 @@ const useHABRStore = create((set, get) => ({
     }
   },
 
-  postHBARpayment: async ({ topic, accountId, network, lookHbarPrice, shop }) => {
+  postHBARpayment: async ({
+    topic,
+    accountId,
+    network,
+    lookHbarPrice,
+    shop,
+  }) => {
     set(
       produce((state) => ({
         ...state,
@@ -170,14 +176,22 @@ const useHABRStore = create((set, get) => ({
       console.log(lookHbarPrice);
 
       console.log(shop);
-      const walletAddress = await axios.get(`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`)
-      console.log('Wallet Address: ', walletAddress.data.walletAddress);
+      const walletAddress = await axios.get(
+        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
+      );
+      console.log("Wallet Address: ", walletAddress.data.walletAddress);
       const provider = hashConnect.getProvider(network, topic, accountId);
       const signer = hashConnect.getSigner(provider);
 
       const trans = await new TransferTransaction()
-        .addHbarTransfer(AccountId.fromString(accountId), Hbar.from(-lookHbarPrice, HbarUnit.TINYBAR))
-        .addHbarTransfer(AccountId.fromString(walletAddress.data.walletAddress), Hbar.from(lookHbarPrice, HbarUnit.TINYBAR))
+        .addHbarTransfer(
+          AccountId.fromString(accountId),
+          Hbar.from(-lookHbarPrice, HbarUnit.TINYBAR)
+        )
+        .addHbarTransfer(
+          AccountId.fromString(walletAddress.data.walletAddress),
+          Hbar.from(lookHbarPrice, HbarUnit.TINYBAR)
+        )
         .freezeWithSigner(signer);
 
       const resp = await trans.executeWithSigner(signer);

@@ -74,7 +74,7 @@ const HbarModal = (props) => {
       accountId,
       network,
       lookHbarPrice,
-      shop
+      shop,
     });
   };
 
@@ -119,7 +119,7 @@ const HbarModal = (props) => {
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
-            textAlign={'center'}
+            textAlign={"center"}
           >
             <Carousel medias={props.lookImage} height={320} width={220} />
             <Box p="6">
@@ -235,7 +235,7 @@ const HbarModal = (props) => {
         <ModalContent>
           <ModalHeader bg="teal" color="#fff">
             {hbarWalletState.get.success.ok
-              ? "Look Details:"
+              ? "Your Discount:"
               : "Please connect to Hashpack Wallet"}
           </ModalHeader>
 
