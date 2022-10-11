@@ -33,6 +33,7 @@ const HbarModal = (props) => {
   const hbarWalletConnect = useHABRStore((state) => state.getHBARWalletConnect);
   const hbarPaymentState = useHABRStore((state) => state.hbarPaymentState);
   const postHBARpayment = useHABRStore((state) => state.postHBARpayment);
+  const hbarCreateToken = useHABRStore((state) => state.hbarCreateToken);
 
   useEffect(() => {
     const fetchHbarPrice = async () => {
@@ -74,7 +75,18 @@ const HbarModal = (props) => {
       accountId,
       network,
       lookHbarPrice,
-      shop
+      shop,
+    });
+  };
+
+  const createToken = async () => {
+    let topic = hbarWalletState.get.success.data.topic;
+    let accountId = hbarWalletState.get.success.data.accountId;
+    let network = hbarWalletState.get.success.data.network;
+    await hbarCreateToken({
+      topic,
+      accountId,
+      network,
     });
   };
 
@@ -119,7 +131,7 @@ const HbarModal = (props) => {
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
-            textAlign={'center'}
+            textAlign={"center"}
           >
             <Carousel medias={props.lookImage} height={320} width={220} />
             <Box p="6">
@@ -151,9 +163,9 @@ const HbarModal = (props) => {
                 <Button
                   colorScheme={"teal"}
                   isFullWidth
-                  onClick={() => payHbar({ lookHbarPrice })}
+                  onClick={() => createToken()}
                 >
-                  Submit the Transaction
+                  Create Token
                 </Button>
               </Box>
             </Box>
