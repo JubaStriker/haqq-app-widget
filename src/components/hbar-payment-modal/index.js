@@ -76,6 +76,7 @@ const HbarModal = (props) => {
       network,
       lookHbarPrice,
       shop,
+<<<<<<< HEAD
     });
   };
 
@@ -87,6 +88,8 @@ const HbarModal = (props) => {
       topic,
       accountId,
       network,
+=======
+>>>>>>> dc1e919aa10a81cf822cbd902f79f55e5ee25a3a
     });
   };
 
@@ -247,7 +250,7 @@ const HbarModal = (props) => {
         <ModalContent>
           <ModalHeader bg="teal" color="#fff">
             {hbarWalletState.get.success.ok
-              ? "Look Details:"
+              ? "Your Discount:"
               : "Please connect to Hashpack Wallet"}
           </ModalHeader>
 

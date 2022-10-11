@@ -1,8 +1,13 @@
 import create from "zustand";
 import produce from "immer";
 import { HashConnect } from "hashconnect";
+<<<<<<< HEAD
 import { AccountId, HbarUnit, Hbar, TransferTransaction, TokenAssociateTransaction, TokenCreateTransaction, PublicKey, TransactionReceipt } from "@hashgraph/sdk";
 import { AwesomeQR } from "awesome-qr";
+=======
+import { AccountId, HbarUnit, Hbar, TransferTransaction } from "@hashgraph/sdk";
+// import { AwesomeQR } from "awesome-qr";
+>>>>>>> dc1e919aa10a81cf822cbd902f79f55e5ee25a3a
 import axios from "axios";
 
 const INITIAL_WALLET_STATE = {
@@ -91,13 +96,33 @@ const useHABRStore = create((set, get) => ({
 
       const initData = await hashConnect.init(appMetadata, `${process.env.REACT_APP_HASHCONNECT_NETWORK}` , false);
 
+<<<<<<< HEAD
+=======
+      // let qrcode = ''
+      // const ScanCode = await new AwesomeQR({
+      //   text: initData.pairingString,
+      //   size: 400,
+      //   margin: 16,
+      //   maskPattern: 110,
+      //   colorLight: "#fff",
+      // }).draw().then((dataURL) => {
+      //   if(dataURL){
+      //     qrcode = dataURL.toString();
+      //   }
+      // })
+      // console.log(qrcode);
+      // QR Code has been generated
+      // need to display instead of loading spinner
+      
+
+>>>>>>> dc1e919aa10a81cf822cbd902f79f55e5ee25a3a
       hashConnect.foundExtensionEvent.once((walletMetadata) => {
         hashConnect.connectToLocalWallet(
           initData.pairingString,
           walletMetadata
         );
       });
-      
+
       let walletAccountID = "";
       hashConnect.pairingEvent.once((pairingData) => {
         pairingData.accountIds.forEach((id) => {
@@ -147,7 +172,13 @@ const useHABRStore = create((set, get) => ({
     }
   },
 
-  postHBARpayment: async ({ topic, accountId, network, lookHbarPrice, shop }) => {
+  postHBARpayment: async ({
+    topic,
+    accountId,
+    network,
+    lookHbarPrice,
+    shop,
+  }) => {
     set(
       produce((state) => ({
         ...state,
@@ -164,8 +195,10 @@ const useHABRStore = create((set, get) => ({
       console.log(lookHbarPrice);
 
       console.log(shop);
-      const walletAddress = await axios.get(`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`)
-      console.log('Wallet Address: ', walletAddress.data.walletAddress);
+      const walletAddress = await axios.get(
+        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
+      );
+      console.log("Wallet Address: ", walletAddress.data.walletAddress);
       const provider = hashConnect.getProvider(network, topic, accountId);
       const signer = hashConnect.getSigner(provider);
 
@@ -200,8 +233,19 @@ const useHABRStore = create((set, get) => ({
       // console.log('associate tx Receipt: ', submitAssociateTx);
 
       const trans = await new TransferTransaction()
+<<<<<<< HEAD
         .addTokenTransfer('0.0.46035403', AccountId.fromString(accountId), -4)
         .addTokenTransfer('0.0.46035403', AccountId.fromString(walletAddress.data.walletAddress), 4)
+=======
+        .addHbarTransfer(
+          AccountId.fromString(accountId),
+          Hbar.from(-lookHbarPrice, HbarUnit.TINYBAR)
+        )
+        .addHbarTransfer(
+          AccountId.fromString(walletAddress.data.walletAddress),
+          Hbar.from(lookHbarPrice, HbarUnit.TINYBAR)
+        )
+>>>>>>> dc1e919aa10a81cf822cbd902f79f55e5ee25a3a
         .freezeWithSigner(signer);
 
       // const transferReceipt = await trans.getReceipt(signer);
