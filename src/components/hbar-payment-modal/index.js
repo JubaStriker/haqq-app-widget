@@ -76,7 +76,6 @@ const HbarModal = (props) => {
       network,
       lookHbarPrice,
       shop,
-<<<<<<< HEAD
     });
   };
 
@@ -88,8 +87,7 @@ const HbarModal = (props) => {
       topic,
       accountId,
       network,
-=======
->>>>>>> dc1e919aa10a81cf822cbd902f79f55e5ee25a3a
+
     });
   };
 
