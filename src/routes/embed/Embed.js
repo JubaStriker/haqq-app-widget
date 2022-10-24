@@ -28,7 +28,7 @@ import useProductsStore from "../../store/products";
 import { ExternalLinkIcon,  } from "@chakra-ui/icons";
 import { ShopContext} from "../../context";
 import Flickity from "react-flickity-component";
-import HbarModal from "../../components/hbar-payment-modal";
+import HbarModal from "../../components/hbar-payment-modal/hbarModal";
 import "../../embed.css";
 import axios from "axios";
 

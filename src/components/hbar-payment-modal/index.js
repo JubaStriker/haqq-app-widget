@@ -25,6 +25,7 @@ import DiscountModal from "./discount";
 import { ShopContext } from "../../context";
 import Carousel from "../../components/carousel";
 
+
 const HbarModal = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [lookHbarPrice, setLookHbarPrice] = useState();

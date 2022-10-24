@@ -1,10 +1,12 @@
 import create from "zustand";
 import produce from "immer";
 import { HashConnect } from "hashconnect";
-import { AccountId, HbarUnit, Hbar, TransferTransaction, TokenAssociateTransaction, TokenCreateTransaction, PublicKey, TransactionReceipt } from "@hashgraph/sdk";
-import { AwesomeQR } from "awesome-qr";
-import { AccountId, HbarUnit, Hbar, TransferTransaction } from "@hashgraph/sdk";
-// import { AwesomeQR } from "awesome-qr";
+import {
+  AccountId,
+  TransferTransaction,
+  PublicKey,
+  TokenAssociateTransaction,
+} from "@hashgraph/sdk";
 
 import axios from "axios";
 
@@ -92,8 +94,12 @@ const useHABRStore = create((set, get) => ({
         icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/4642.png",
       };
 
-      const initData = await hashConnect.init(appMetadata, `${process.env.REACT_APP_HASHCONNECT_NETWORK}` , false);
-      
+      const initData = await hashConnect.init(
+        appMetadata,
+        `${process.env.REACT_APP_HASHCONNECT_NETWORK}`,
+        false
+      );
+
       hashConnect.foundExtensionEvent.once((walletMetadata) => {
         hashConnect.connectToLocalWallet(
           initData.pairingString,
@@ -180,30 +186,32 @@ const useHABRStore = create((set, get) => ({
       const provider = hashConnect.getProvider(network, topic, accountId);
       const signer = hashConnect.getSigner(provider);
 
-      const accountInfo = await fetch(`${process.env.REACT_APP_HEDERA_ACCOUNT_VERIFY}api/v1/accounts?account.id=${accountId}`)
-      const accountResponse = await accountInfo.json()
+      const accountInfo = await fetch(
+        `${process.env.REACT_APP_HEDERA_ACCOUNT_VERIFY}api/v1/accounts?account.id=${accountId}`
+      );
+      const accountResponse = await accountInfo.json();
 
       console.log(accountResponse);
-      console.log(accountResponse.accounts[0].key.key)
-      
+      console.log(accountResponse.accounts[0].key.key);
+
       const key = PublicKey.fromString(accountResponse.accounts[0].key.key);
-      console.log('Key: ', key);
+      console.log("Key: ", key);
 
-    //   const createTokenTx = await new TokenCreateTransaction()
-    //   .setTokenName('Sampel Test Token')
-    //   .setTokenSymbol('STT')
-    //   .setDecimals(0)
-    //   .setInitialSupply(10)
-    //   .setTreasuryAccountId(accountId)
-    //   .setAdminKey(key)
-    //   .setSupplyKey(key)
-    //   .setWipeKey(key)
-    //   .freezeWithSigner(signer);
-      
-    //  const submitAssociateTx = await createTokenTx.executeWithSigner(signer);
-    //   // const associateReceipt = await submitAssociateTx.getReceipt(signer);
+      //   const createTokenTx = await new TokenCreateTransaction()
+      //   .setTokenName('Sampel Test Token')
+      //   .setTokenSymbol('STT')
+      //   .setDecimals(0)
+      //   .setInitialSupply(10)
+      //   .setTreasuryAccountId(accountId)
+      //   .setAdminKey(key)
+      //   .setSupplyKey(key)
+      //   .setWipeKey(key)
+      //   .freezeWithSigner(signer);
 
-    //   console.log('associate tx Receipt: ', submitAssociateTx);
+      //  const submitAssociateTx = await createTokenTx.executeWithSigner(signer);
+      //   // const associateReceipt = await submitAssociateTx.getReceipt(signer);
+
+      //   console.log('associate tx Receipt: ', submitAssociateTx);
 
       // const submitAssociateTx = await associateTx.executeWithSigner(signer);
       // const associateReceipt = await submitAssociateTx.getReceipt(signer);
@@ -212,8 +220,12 @@ const useHABRStore = create((set, get) => ({
 
       const trans = await new TransferTransaction()
 
-        .addTokenTransfer('0.0.46035403', AccountId.fromString(accountId), -4)
-        .addTokenTransfer('0.0.46035403', AccountId.fromString(walletAddress.data.walletAddress), 4)
+        .addTokenTransfer("0.0.46035403", AccountId.fromString(accountId), -4)
+        .addTokenTransfer(
+          "0.0.46035403",
+          AccountId.fromString(walletAddress.data.walletAddress),
+          4
+        )
 
         // .addHbarTransfer(
         //   AccountId.fromString(accountId),
@@ -227,9 +239,8 @@ const useHABRStore = create((set, get) => ({
         .freezeWithSigner(signer);
 
       // const transferReceipt = await trans.getReceipt(signer);
-      console.log('Transfer tx receipt: ', trans);
+      console.log("Transfer tx receipt: ", trans);
       const resp = await trans.executeWithSigner(signer);
-      
 
       // set(
       //   produce((state) => ({
@@ -271,7 +282,81 @@ const useHABRStore = create((set, get) => ({
     }
   },
   hbarTokenState: INITIAL_TOKEN_STATE,
-  hbarCreateToken: async ({ topic, accountId, network }) => {
+  hbarAssociateToken: async ({ accountId, network, topic, shop }) => {
+    set(
+      produce((state) => ({
+        ...state,
+        hbarTokenState: {
+          ...state.hbarTokenState,
+          get: {
+            ...INITIAL_TOKEN_STATE.get,
+            loading: true,
+          },
+        },
+      }))
+    );
+    try {
+      console.log(accountId, network, topic, shop);
+
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
+      );
+
+      console.log(data.walletToken);
+
+      const provider = hashConnect.getProvider(network, topic, accountId);
+      const signer = hashConnect.getSigner(provider);
+
+      console.log(signer);
+
+      const associateToken = await new TokenAssociateTransaction()
+        .setAccountId(accountId)
+        .setTokenIds([data.walletToken])
+        .freezeWithSigner(signer);
+
+      const associateResp = await associateToken.executeWithSigner(signer);
+
+      console.log(associateResp);
+      set(
+        produce((state) => ({
+          ...state,
+          hbarTokenState: {
+            ...state.hbarTokenState,
+            get: {
+              ...INITIAL_TOKEN_STATE.get,
+              success: {
+                ok: true,
+                data: {
+                  network,
+                  topic,
+                  accountId,
+                  tokenId: data.walletToken,
+                  walletAddress: data.walletAddress,
+                },
+              },
+            },
+          },
+        }))
+      );
+    } catch (error) {
+      set(
+        produce((state) => ({
+          ...state,
+          hbarTokenState: {
+            ...state.hbarTokenState,
+            get: {
+              ...INITIAL_TOKEN_STATE.get,
+              failure: {
+                error: true,
+                message: error.message,
+              },
+            },
+          },
+        }))
+      );
+    }
+  },
+  hbarPayToken: async ({ network, topic, accountId, tokenId, merchantId }) => {
     set(
       produce((state) => ({
         ...state,
@@ -288,52 +373,45 @@ const useHABRStore = create((set, get) => ({
       const provider = hashConnect.getProvider(network, topic, accountId);
       const signer = hashConnect.getSigner(provider);
 
-      let accountInfo = await fetch(
-        "https://testnet.mirrornode.hedera.com/api/v1/accounts/" + accountId,
-        { method: "GET" }
-      );
-      let account = await accountInfo.json();
-      console.log(account);
+      const tokenTransferTx = await new TransferTransaction()
+      .addTokenTransfer(tokenId, accountId, -1 )
+      .addTokenTransfer(tokenId, merchantId, 1)
+      .freezeWithSigner(signer);
 
-      let key = PublicKey.fromString(account.key.key);
-      console.log(key);
+      const resp = await tokenTransferTx.executeWithSigner(signer);
+      console.log("Finally transfered Token", resp);
 
-      const createTokenTx = await new TokenCreateTransaction()
-        .setTokenName("example 1")
-        .setTokenSymbol("exe1")
-        .setDecimals(0)
-        .setInitialSupply(5)
-        .setTreasuryAccountId(accountId)
-        .setAdminKey(key)
-        .setSupplyKey(key)
-        .setWipeKey(key)
-        .setAutoRenewAccountId(accountId)
-        .freezeWithSigner(signer);
-
-      const createReceipt = await createTokenTx.executeWithSigner(signer);
-      console.log("Created Receipt: ", createReceipt);
-
-      let txId = createReceipt.transactionId;
-      let respId = txId.replace(/[^\d+]/g, "-");
-      let respid = respId.replace("-", ".");
-      let transId = respid.replace("-", ".");
-
-      console.log("Transaction Id: ", transId);
-      try {
-        let transactionResponse = await fetch(
-          `https://testnet.mirrornode.hedera.com/api/v1/transactions/${transId}`, // getting CORS Error on this API Call
-          { method: "GET" }
-        )
-
-        console.log(transactionResponse);
-      } catch (error) {
-        console.log(error);
-      }
-
-      
-     
+      set(
+        produce((state) => ({
+          ...state,
+          hbarTokenState: {
+            ...state.INITIAL_TOKEN_STATE,
+            get:{
+              ...INITIAL_TOKEN_STATE.get,
+              success: {
+                ok: true,
+                data: resp
+              }
+            }
+          }
+        }))
+      )
     } catch (error) {
-      console.log(error)
+      set(
+        produce((state) => ({
+          ...state,
+          hbarTokenState: {
+            ...state.hbarTokenState,
+            get: {
+              ...INITIAL_TOKEN_STATE.get,
+              failure: {
+                error: true,
+                message: error.message,
+              },
+            },
+          },
+        }))
+      );
     }
   },
 }));
