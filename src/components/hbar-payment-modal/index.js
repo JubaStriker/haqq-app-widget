@@ -36,6 +36,10 @@ const HbarModal = (props) => {
   const postHBARpayment = useHABRStore((state) => state.postHBARpayment);
   const hbarCreateToken = useHABRStore((state) => state.hbarCreateToken);
 
+
+
+  console.log('Hello World',hbarPaymentState);
+
   useEffect(() => {
     const fetchHbarPrice = async () => {
       const resp = await fetch(
@@ -43,7 +47,7 @@ const HbarModal = (props) => {
       );
       const response = await resp.json();
       const convertedHbar = response.HBAR * props.lookPrice;
-      setLookHbarPrice(convertedHbar.toFixed(2));
+      setLookHbarPrice('5');
     };
     fetchHbarPrice();
   }, []);
@@ -67,18 +71,11 @@ const HbarModal = (props) => {
     const walletDetails = await hbarWalletConnect();
   };
 
-  const payHbar = async ({ lookHbarPrice }) => {
-    let topic = hbarWalletState.get.success.data.topic;
-    let accountId = hbarWalletState.get.success.data.accountId;
-    let network = hbarWalletState.get.success.data.network;
-    const payhbar = await postHBARpayment({
-      topic,
-      accountId,
-      network,
-      lookHbarPrice,
-      shop,
-    });
-  };
+
+  const postHbarPaymentHandler = async () => {
+    const { accountId, network, topic } = hbarWalletState.get.success.data;
+    postHBARpayment({   topic, accountId, network, lookHbarPrice, shop, })
+  }
 
   const createToken = async () => {
     let topic = hbarWalletState.get.success.data.topic;
@@ -165,9 +162,9 @@ const HbarModal = (props) => {
                 <Button
                   colorScheme={"teal"}
                   isFullWidth
-                  onClick={() => createToken()}
+                  onClick={() => postHbarPaymentHandler()}
                 >
-                  Create Token
+                  Pay Habr
                 </Button>
               </Box>
             </Box>
