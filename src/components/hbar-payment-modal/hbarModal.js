@@ -18,8 +18,11 @@ import axios from "axios";
 const HbarModal = (props) => {
   console.log(props);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [lookHbarPrice, setLookHbarPrice] = useState();
+  const [lookHbarPrice, setLookHbarPrice] = useState('5');
   const hbarWalletState = useHABRStore((state) => state.hbarWalletState);
+
+  const postHBARpayment = useHABRStore((state) => state.postHBARpayment)
+
   const getHBARWalletConnect = useHABRStore(
     (state) => state.getHBARWalletConnect
   );
@@ -35,10 +38,19 @@ const HbarModal = (props) => {
     getHBARWalletConnect();
   };
 
+  console.log(hbarWalletState.get?.success?.data?.tokenId);
+
   const associateTokenHandler = () => {
     const { accountId, network, topic } = hbarWalletState.get.success.data;
     hbarAssociateToken({ accountId, network, topic, shop });
   };
+
+
+  
+  const postHbarPaymentHandler = async () => {
+    const { accountId, network, topic } = hbarWalletState.get.success.data;
+    postHBARpayment({   topic, accountId, network, lookHbarPrice, shop, })
+  }
 
   const hbarPayTokenHandler = async () => {
     const { network, topic, accountId } =
@@ -116,7 +128,7 @@ const HbarModal = (props) => {
               </Box>
 
               <Box>
-                {lookHbarPrice}
+                {props.lookPrice}
                 <Box as="span" color="gray.600" fontSize="sm">
                   HBAR
                 </Box>
@@ -133,9 +145,17 @@ const HbarModal = (props) => {
                 <Button
                   colorScheme={"teal"}
                   isFullWidth
-                  onClick={() => associateTokenHandler()}
+                  onClick={() => postHbarPaymentHandler()}
+                 
                 >
-                  Associate Token
+                  Pay HBAR
+                </Button>
+                <Button
+                colorScheme={"teal"}
+                isFullWidth
+                onClick={() => associateTokenHandler()}
+                >
+                  Associat Token
                 </Button>
               </Box>
             </Box>

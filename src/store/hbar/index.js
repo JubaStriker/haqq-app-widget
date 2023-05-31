@@ -6,6 +6,8 @@ import {
   TransferTransaction,
   PublicKey,
   TokenAssociateTransaction,
+  HbarUnit,
+  Hbar
 } from "@hashgraph/sdk";
 
 import axios from "axios";
@@ -197,67 +199,37 @@ const useHABRStore = create((set, get) => ({
       const key = PublicKey.fromString(accountResponse.accounts[0].key.key);
       console.log("Key: ", key);
 
-      //   const createTokenTx = await new TokenCreateTransaction()
-      //   .setTokenName('Sampel Test Token')
-      //   .setTokenSymbol('STT')
-      //   .setDecimals(0)
-      //   .setInitialSupply(10)
-      //   .setTreasuryAccountId(accountId)
-      //   .setAdminKey(key)
-      //   .setSupplyKey(key)
-      //   .setWipeKey(key)
-      //   .freezeWithSigner(signer);
-
-      //  const submitAssociateTx = await createTokenTx.executeWithSigner(signer);
-      //   // const associateReceipt = await submitAssociateTx.getReceipt(signer);
-
-      //   console.log('associate tx Receipt: ', submitAssociateTx);
-
-      // const submitAssociateTx = await associateTx.executeWithSigner(signer);
-      // const associateReceipt = await submitAssociateTx.getReceipt(signer);
-
-      // console.log('associate tx Receipt: ', submitAssociateTx);
-
       const trans = await new TransferTransaction()
-
-        .addTokenTransfer("0.0.46035403", AccountId.fromString(accountId), -4)
-        .addTokenTransfer(
-          "0.0.46035403",
-          AccountId.fromString(walletAddress.data.walletAddress),
-          4
+        .addHbarTransfer(
+          AccountId.fromString(accountId),
+          Hbar.from(-lookHbarPrice, HbarUnit.TINYBAR)
         )
-
-        // .addHbarTransfer(
-        //   AccountId.fromString(accountId),
-        //   Hbar.from(-lookHbarPrice, HbarUnit.TINYBAR)
-        // )
-        // .addHbarTransfer(
-        //   AccountId.fromString(walletAddress.data.walletAddress),
-        //   Hbar.from(lookHbarPrice, HbarUnit.TINYBAR)
-        // )
+        .addHbarTransfer(
+          AccountId.fromString(walletAddress.data.walletAddress),
+          Hbar.from(lookHbarPrice, HbarUnit.TINYBAR)
+        )
 
         .freezeWithSigner(signer);
 
-      // const transferReceipt = await trans.getReceipt(signer);
       console.log("Transfer tx receipt: ", trans);
       const resp = await trans.executeWithSigner(signer);
 
-      // set(
-      //   produce((state) => ({
-      //     ...state,
-      //     hbarPaymentState: {
-      //       ...state.hbarPaymentState,
-      //       post: {
-      //         ...INITIAL_HBAR_STATE.post,
-      //         loading: false,
-      //         success: {
-      //           data: resp,
-      //           ok: true,
-      //         },
-      //       },
-      //     },
-      //   }))
-      // );
+      set(
+        produce((state) => ({
+          ...state,
+          hbarPaymentState: {
+            ...state.hbarPaymentState,
+            post: {
+              ...INITIAL_HBAR_STATE.post,
+              loading: false,
+              success: {
+                data: resp,
+                ok: true,
+              },
+            },
+          },
+        }))
+      );
     } catch (e) {
       console.log(e.message);
       set(
@@ -296,17 +268,15 @@ const useHABRStore = create((set, get) => ({
       }))
     );
     try {
-      console.log(accountId, network, topic, shop);
-
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
-      );
-
-      console.log(data.walletToken);
-
-      const provider = hashConnect.getProvider(network, topic, accountId);
+      
+      const  {data}  = await axios.get(
+				`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
+			);
+      try {
+        console.log(data.walletToken)
+        const provider = hashConnect.getProvider(network, topic, accountId);
       const signer = hashConnect.getSigner(provider);
-
+      
       console.log(signer);
 
       const associateToken = await new TokenAssociateTransaction()
@@ -338,6 +308,13 @@ const useHABRStore = create((set, get) => ({
           },
         }))
       );
+      } catch (error) {
+        console.log(error)
+        throw error;
+        
+      }
+
+      
     } catch (error) {
       set(
         produce((state) => ({
@@ -367,7 +344,7 @@ const useHABRStore = create((set, get) => ({
             loading: true,
           },
         },
-      }))
+      })) 
     );
     try {
       const provider = hashConnect.getProvider(network, topic, accountId);
