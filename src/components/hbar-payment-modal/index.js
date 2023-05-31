@@ -25,20 +25,21 @@ import DiscountModal from "./discount";
 import { ShopContext } from "../../context";
 import Carousel from "../../components/carousel";
 
-
 const HbarModal = (props) => {
+  let txid = "";
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [lookHbarPrice, setLookHbarPrice] = useState();
+  const {
+    isOpen: isDiscountCodeModalOpen,
+    onOpen: onDiscountCodeModalOpen,
+    onClose: onDiscountCodeModalClose,
+  } = useDisclosure();
   const shop = useContext(ShopContext);
   const hbarWalletState = useHABRStore((state) => state.hbarWalletState);
   const hbarWalletConnect = useHABRStore((state) => state.getHBARWalletConnect);
   const hbarPaymentState = useHABRStore((state) => state.hbarPaymentState);
   const postHBARpayment = useHABRStore((state) => state.postHBARpayment);
   const hbarCreateToken = useHABRStore((state) => state.hbarCreateToken);
-
-
-
-  console.log('Hello World',hbarPaymentState);
 
   useEffect(() => {
     const fetchHbarPrice = async () => {
@@ -47,23 +48,19 @@ const HbarModal = (props) => {
       );
       const response = await resp.json();
       const convertedHbar = response.HBAR * props.lookPrice;
-      setLookHbarPrice('5');
+      setLookHbarPrice(convertedHbar.toFixed(2));
     };
     fetchHbarPrice();
   }, []);
 
-  const resethbarPaymentState = useHABRStore(
-    (state) => state.resetHBARPaymentState
-  );
-
-  const resetHBARWalletSate = useHABRStore(
-    (state) => state.resetHBARWalletSate
+  const { resetHBARPaymentState, resetHBARWalletSate } = useHABRStore(
+    (state) => state
   );
 
   const onModalClose = () => {
     resetHBARWalletSate();
-    resethbarPaymentState();
-    onClose();
+    resetHBARPaymentState();
+    setTimeout(() => onClose(), 250);
   };
 
   const connectWallet = async () => {
@@ -71,11 +68,10 @@ const HbarModal = (props) => {
     const walletDetails = await hbarWalletConnect();
   };
 
-
   const postHbarPaymentHandler = async () => {
     const { accountId, network, topic } = hbarWalletState.get.success.data;
-    postHBARpayment({   topic, accountId, network, lookHbarPrice, shop, })
-  }
+    postHBARpayment({ topic, accountId, network, lookHbarPrice, shop });
+  };
 
   const createToken = async () => {
     let topic = hbarWalletState.get.success.data.topic;
@@ -85,7 +81,6 @@ const HbarModal = (props) => {
       topic,
       accountId,
       network,
-
     });
   };
 
@@ -144,18 +139,14 @@ const HbarModal = (props) => {
                 {props.lookName}
               </Box>
 
-              <Box>
-                {lookHbarPrice}
-                <Box as="span" color="gray.600" fontSize="sm">
-                  HBAR
-                </Box>
-              </Box>
-
-              <Box display="flex" mt="2" alignItems="center">
-                Wallet Address that HBAR transfering from
-                <Box as="span" ml="2" color="gray.600" fontSize="sm">
-                  {hbarWalletState.get.success.data.accountId}
-                </Box>
+              <Box
+                display="flex"
+                mt="2"
+                alignItems="center"
+                justifyContent="center"
+              >
+                Wallet Address that HBAR transfering from{" "}
+                {hbarWalletState.get.success.data.accountId}
               </Box>
 
               <Box display="flex" mt="2" alignItems="center">
@@ -164,24 +155,12 @@ const HbarModal = (props) => {
                   isFullWidth
                   onClick={() => postHbarPaymentHandler()}
                 >
-                  Pay Habr
+                  Pay {lookHbarPrice} hBar
                 </Button>
               </Box>
             </Box>
           </Box>
         </>
-      );
-    } else {
-      return (
-        <Box p={10}>
-          <Button
-            colorScheme={"teal"}
-            onClick={() => connectWallet()}
-            isFullWidth
-          >
-            Connect to Wallet
-          </Button>
-        </Box>
       );
     }
   };
@@ -219,20 +198,31 @@ const HbarModal = (props) => {
         </>
       );
     } else if (hbarPaymentState.post.success.ok) {
-      return <DiscountModal />;
-    } else {
-      return (
-        <Box p={10}>
-          <Button
-            colorScheme={"teal"}
-            onClick={() => connectWallet()}
-            isFullWidth
-          >
-            Connect to Wallet
-          </Button>
-        </Box>
-      );
+      txid = hbarPaymentState?.post?.success?.data?.transactionId;
+      onModalClose();
+      console.log(hbarPaymentState.post.success, props);
+      setTimeout(() => onDiscountCodeModalOpen(), 500);
+      // return (
+      //   <DiscountModal
+      //     txid={hbarPaymentState.post.success.data.transactionHash}
+      //     lookId={props.lookId}
+      //   />
+      // );
+      return null;
     }
+    // else {
+    //   return (
+    //     <Box p={10}>
+    //       <Button
+    //         colorScheme={"teal"}
+    //         onClick={() => connectWallet()}
+    //         isFullWidth
+    //       >
+    //         Connect to Wallet
+    //       </Button>
+    //     </Box>
+    //   );
+    // }
   };
 
   return (
@@ -245,15 +235,30 @@ const HbarModal = (props) => {
         <ModalOverlay />
         <ModalContent>
           <ModalHeader bg="teal" color="#fff">
-            {hbarWalletState.get.success.ok
-              ? "Your Discount:"
-              : "Please connect to Hashpack Wallet"}
+            Please connect to hbar wallet to pay
           </ModalHeader>
 
           <ModalBody>
             {hbarPaymentState.post.success.ok
               ? renderPaymentStatus()
               : renderWalletStatus()}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={isDiscountCodeModalOpen}
+        onClose={onDiscountCodeModalClose}
+        size="xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader bg="teal" color="#fff">
+            Here is your discount code
+          </ModalHeader>
+
+          <ModalBody>
+            <DiscountModal txid={txid} lookId={props.lookId} />
           </ModalBody>
         </ModalContent>
       </Modal>

@@ -7,7 +7,7 @@ import {
   PublicKey,
   TokenAssociateTransaction,
   HbarUnit,
-  Hbar
+  Hbar,
 } from "@hashgraph/sdk";
 
 import axios from "axios";
@@ -268,53 +268,49 @@ const useHABRStore = create((set, get) => ({
       }))
     );
     try {
-      
-      const  {data}  = await axios.get(
-				`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
-			);
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
+      );
       try {
-        console.log(data.walletToken)
+        console.log(data.walletToken);
         const provider = hashConnect.getProvider(network, topic, accountId);
-      const signer = hashConnect.getSigner(provider);
-      
-      console.log(signer);
+        const signer = hashConnect.getSigner(provider);
 
-      const associateToken = await new TokenAssociateTransaction()
-        .setAccountId(accountId)
-        .setTokenIds([data.walletToken])
-        .freezeWithSigner(signer);
+        console.log(signer);
 
-      const associateResp = await associateToken.executeWithSigner(signer);
+        const associateToken = await new TokenAssociateTransaction()
+          .setAccountId(accountId)
+          .setTokenIds([data.walletToken])
+          .freezeWithSigner(signer);
 
-      console.log(associateResp);
-      set(
-        produce((state) => ({
-          ...state,
-          hbarTokenState: {
-            ...state.hbarTokenState,
-            get: {
-              ...INITIAL_TOKEN_STATE.get,
-              success: {
-                ok: true,
-                data: {
-                  network,
-                  topic,
-                  accountId,
-                  tokenId: data.walletToken,
-                  walletAddress: data.walletAddress,
+        const associateResp = await associateToken.executeWithSigner(signer);
+
+        console.log(associateResp);
+        set(
+          produce((state) => ({
+            ...state,
+            hbarTokenState: {
+              ...state.hbarTokenState,
+              get: {
+                ...INITIAL_TOKEN_STATE.get,
+                success: {
+                  ok: true,
+                  data: {
+                    network,
+                    topic,
+                    accountId,
+                    tokenId: data.walletToken,
+                    walletAddress: data.walletAddress,
+                  },
                 },
               },
             },
-          },
-        }))
-      );
+          }))
+        );
       } catch (error) {
-        console.log(error)
+        console.log(error);
         throw error;
-        
       }
-
-      
     } catch (error) {
       set(
         produce((state) => ({
@@ -344,16 +340,16 @@ const useHABRStore = create((set, get) => ({
             loading: true,
           },
         },
-      })) 
+      }))
     );
     try {
       const provider = hashConnect.getProvider(network, topic, accountId);
       const signer = hashConnect.getSigner(provider);
 
       const tokenTransferTx = await new TransferTransaction()
-      .addTokenTransfer(tokenId, accountId, -1 )
-      .addTokenTransfer(tokenId, merchantId, 1)
-      .freezeWithSigner(signer);
+        .addTokenTransfer(tokenId, accountId, -1)
+        .addTokenTransfer(tokenId, merchantId, 1)
+        .freezeWithSigner(signer);
 
       const resp = await tokenTransferTx.executeWithSigner(signer);
       console.log("Finally transfered Token", resp);
@@ -363,16 +359,16 @@ const useHABRStore = create((set, get) => ({
           ...state,
           hbarTokenState: {
             ...state.INITIAL_TOKEN_STATE,
-            get:{
+            get: {
               ...INITIAL_TOKEN_STATE.get,
               success: {
                 ok: true,
-                data: resp
-              }
-            }
-          }
+                data: resp,
+              },
+            },
+          },
         }))
-      )
+      );
     } catch (error) {
       set(
         produce((state) => ({
