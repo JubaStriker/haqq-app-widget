@@ -96,45 +96,80 @@ const useHABRStore = create((set, get) => ({
         icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/4642.png",
       };
 
-      const initData = await hashConnect.init(
-        appMetadata,
-        `${process.env.REACT_APP_HASHCONNECT_NETWORK}`,
-        false
-      );
+      const walletConnectMessage = {
+        method: "connect",
+        platform: "hbar-shop",
+      };
+      window.top.postMessage(JSON.stringify(walletConnectMessage), "*");
 
-      hashConnect.foundExtensionEvent.once((walletMetadata) => {
-        hashConnect.connectToLocalWallet(
-          initData.pairingString,
-          walletMetadata
-        );
-      });
-
-      let walletAccountID = "";
-      hashConnect.pairingEvent.once((pairingData) => {
-        pairingData.accountIds.forEach((id) => {
-          walletAccountID = id;
-        });
-        set(
-          produce((state) => ({
-            ...state,
-            hbarWalletState: {
-              ...state.hbarWalletState,
-              get: {
-                ...INITIAL_WALLET_STATE.get,
-                loading: false,
-                success: {
-                  data: {
-                    topic: pairingData.topic,
-                    accountId: walletAccountID,
-                    network: pairingData.network,
+      window.onmessage = async function (e) {
+        try {
+          const parsedData = JSON.parse(e.data);
+          if (parsedData.platform === "hbar-shop") {
+            if (
+              parsedData.method === "connect" &&
+              parsedData.status === "success"
+            ) {
+              set(
+                produce((state) => ({
+                  ...state,
+                  hbarWalletState: {
+                    ...state.hbarWalletState,
+                    get: {
+                      ...INITIAL_WALLET_STATE.get,
+                      loading: false,
+                      success: {
+                        data: parsedData.data,
+                        ok: true,
+                      },
+                    },
                   },
-                  ok: true,
-                },
-              },
-            },
-          }))
-        );
-      });
+                }))
+              );
+            }
+          }
+        } catch (e) {}
+      };
+
+      // const initData = await hashConnect.init(
+      //   appMetadata,
+      //   `${process.env.REACT_APP_HASHCONNECT_NETWORK}`,
+      //   false
+      // );
+
+      // hashConnect.foundExtensionEvent.once((walletMetadata) => {
+      //   hashConnect.connectToLocalWallet(
+      //     initData.pairingString,
+      //     walletMetadata
+      //   );
+      // });
+
+      // let walletAccountID = "";
+      // hashConnect.pairingEvent.once((pairingData) => {
+      //   pairingData.accountIds.forEach((id) => {
+      //     walletAccountID = id;
+      //   });
+      //   set(
+      //     produce((state) => ({
+      //       ...state,
+      //       hbarWalletState: {
+      //         ...state.hbarWalletState,
+      //         get: {
+      //           ...INITIAL_WALLET_STATE.get,
+      //           loading: false,
+      //           success: {
+      //             data: {
+      //               topic: pairingData.topic,
+      //               accountId: walletAccountID,
+      //               network: pairingData.network,
+      //             },
+      //             ok: true,
+      //           },
+      //         },
+      //       },
+      //     }))
+      //   );
+      // });
     } catch (e) {
       set(
         produce((state) => ({
@@ -178,58 +213,52 @@ const useHABRStore = create((set, get) => ({
       }))
     );
     try {
-      console.log(lookHbarPrice);
-
-      console.log(shop);
       const walletAddress = await axios.get(
         `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
       );
-      console.log("Wallet Address: ", walletAddress.data.walletAddress);
-      const provider = hashConnect.getProvider(network, topic, accountId);
-      const signer = hashConnect.getSigner(provider);
 
-      const accountInfo = await fetch(
-        `${process.env.REACT_APP_HEDERA_ACCOUNT_VERIFY}api/v1/accounts?account.id=${accountId}`
-      );
-      const accountResponse = await accountInfo.json();
+      const walletTransferMessage = {
+        method: "transfer",
+        platform: "hbar-shop",
+        data: {
+          topic,
+          accountId,
+          network,
+          lookHbarPrice,
+          shop,
+          walletAddress,
+        },
+      };
+      window.top.postMessage(JSON.stringify(walletTransferMessage), "*");
 
-      console.log(accountResponse);
-      console.log(accountResponse.accounts[0].key.key);
-
-      const key = PublicKey.fromString(accountResponse.accounts[0].key.key);
-      console.log("Key: ", key);
-
-      const trans = await new TransferTransaction()
-        .addHbarTransfer(
-          AccountId.fromString(accountId),
-          Hbar.from(-lookHbarPrice, HbarUnit.TINYBAR)
-        )
-        .addHbarTransfer(
-          AccountId.fromString(walletAddress.data.walletAddress),
-          Hbar.from(lookHbarPrice, HbarUnit.TINYBAR)
-        )
-
-        .freezeWithSigner(signer);
-
-      console.log("Transfer tx receipt: ", trans);
-      const resp = await trans.executeWithSigner(signer);
-
-      set(
-        produce((state) => ({
-          ...state,
-          hbarPaymentState: {
-            ...state.hbarPaymentState,
-            post: {
-              ...INITIAL_HBAR_STATE.post,
-              loading: false,
-              success: {
-                data: resp,
-                ok: true,
-              },
-            },
-          },
-        }))
-      );
+      window.onmessage = async function (e) {
+        try {
+          const parsedData = JSON.parse(e.data);
+          if (parsedData.platform === "hbar-shop") {
+            if (
+              parsedData.method === "transfer" &&
+              parsedData.status === "success"
+            ) {
+              set(
+                produce((state) => ({
+                  ...state,
+                  hbarPaymentState: {
+                    ...state.hbarPaymentState,
+                    post: {
+                      ...INITIAL_HBAR_STATE.post,
+                      loading: false,
+                      success: {
+                        data: parsedData.data,
+                        ok: true,
+                      },
+                    },
+                  },
+                }))
+              );
+            }
+          }
+        } catch (e) {}
+      };
     } catch (e) {
       console.log(e.message);
       set(
