@@ -31,6 +31,8 @@ import { ShopContext } from "../../context";
 import useXummStore from "../../store/xumm";
 
 const XrpModal = (props) => {
+
+    const [sender, setSender] = useState('')
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isDiscountCodeModalOpen,
@@ -41,7 +43,7 @@ const XrpModal = (props) => {
     const shop = useContext(ShopContext);
     const xrpPaymentState = useXRPStore((state) => state.xrpPaymentState);
     const postXRPpayment = useXRPStore((state) => state.postXRPpayment);
-    const { getXummPaymentPromptAction, xummState } = useXummStore(
+    const { getXummPaymentPromptAction, xummState, verifyXummPayment } = useXummStore(
         (state) => state
     );
     const { getCouponAction, couponState } = useCouponsStore((state) => state);
@@ -74,15 +76,18 @@ const XrpModal = (props) => {
                 console.log("Connected.....");
             };
 
+
+
             client.onmessage = async (e) => {
-                console.log(e);
+                // console.log(e);
                 const newObj = await JSON.parse(e.data);
-                console.log(e.data, newObj);
-                console.log(newObj.txid);
+                // console.log(e.data, newObj);
+                // console.log(newObj.txid);
                 const txid = await newObj.txid;
                 console.log(txid);
                 if (txid !== undefined) {
-                    // const resp = await verifyXummPayment({ txid });
+                    const res = await verifyXummPayment({ txid });
+                    setSender(res.result.Account)
                     onModalClose();
                     getCouponAction({ txid, shop, lookId });
                     onDiscountCodeModalOpen();
@@ -171,7 +176,7 @@ const XrpModal = (props) => {
     };
 
     const renderDiscountCode = () => {
-        console.log(couponState.get);
+        // console.log(couponState.get);
 
         if (couponState.get.loading) {
             return (
@@ -205,7 +210,16 @@ const XrpModal = (props) => {
             );
         } else if (couponState.get.success.ok) {
             const { data: couponData } = couponState.get.success;
-            console.log(couponData);
+            const code = couponData.discount?.code
+            const customerWallet = sender
+
+            const data = {
+                code: code,
+                walletAddress: customerWallet
+            }
+
+            console.log("----------data---------", data)
+
             return (
                 <Alert
                     status="success"
