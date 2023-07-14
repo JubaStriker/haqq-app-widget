@@ -25,12 +25,13 @@ import {
 import Carousel from "../../components/carousel";
 import useLooksStore from "../../store/looks";
 import useProductsStore from "../../store/products";
-import { ExternalLinkIcon,  } from "@chakra-ui/icons";
-import { ShopContext} from "../../context";
+import { ExternalLinkIcon, } from "@chakra-ui/icons";
+import { ShopContext } from "../../context";
 import Flickity from "react-flickity-component";
 import HbarModal from "../../components/hbar-payment-modal";
 import "../../embed.css";
 import axios from "axios";
+import XrpModal from "../../components/xrp-payment-modal";
 
 const ProductsModal = (props) => {
   const { isOpen, onClose, productIds = [], lookId } = props;
@@ -189,6 +190,8 @@ const EmbedRoute = (props) => {
   const [currentLookId, setCurrentLookId] = useState("");
   const [freePlanLimitReached, setFreePlanLimitReached] = useState(false);
 
+  console.log("Looks: ", looks.get.success.data)
+
   useEffect(async () => {
     getLooks({ shop });
     try {
@@ -201,7 +204,7 @@ const EmbedRoute = (props) => {
       if (data && !data.subscribed && data.count > 1000) {
         setFreePlanLimitReached(true);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   const onLooksClick = ({ lookId, products }) => {
@@ -309,7 +312,7 @@ const EmbedRoute = (props) => {
                   </Text>
                   <Heading fontSize={"xl"} fontFamily={"body"} fontWeight={500}>
                     {look.name}
-                    
+
                   </Heading>
                   <Button
                     marginTop={"10px"}
@@ -323,7 +326,17 @@ const EmbedRoute = (props) => {
                   >
                     Shop The Look
                   </Button>
-                  <HbarModal lookPrice={look.price} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} />
+                  {look.blockchain === 'hedera' ?
+                    <HbarModal lookPrice={look.price} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
+                    ""
+                  }
+
+                  {look.blockchain === 'ripple' ?
+
+                    <XrpModal lookXrpPrice={look.xrpPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
+                    ""
+                  }
+
                 </Stack>
               </Box>
             </Center>
@@ -352,7 +365,7 @@ const EmbedRoute = (props) => {
         <Heading>Shop The Look</Heading>
         
       </Center> */}
-      <br />
+        <br />
         <Flickity
           options={{
             groupCells: 1,

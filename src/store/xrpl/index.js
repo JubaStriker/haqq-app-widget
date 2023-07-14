@@ -1,11 +1,11 @@
 import create from "zustand";
 import produce from "immer";
-import axios from "axios";
+
+console.log(window.xrpl, "Window")
 
 const client = new window.xrpl.Client("wss://s.altnet.rippletest.net:51233");
-const wallet = window.xrpl.Wallet.fromSeed(
-    "spkKJ7x19doar9wzDMpBsAP9cnA4W"
-); /* buyyer Seed */
+const wallet = window.xrpl.Wallet.fromSeed("spkKJ7x19doar9wzDMpBsAP9cnA4W");
+/* buyyer Seed */
 /* Buyyer Address = r9pMWAyz6PpCjRvogLoWmgnc7VVUTaKDRy */
 
 const INITIAL_XRP_STATE = {
