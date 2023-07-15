@@ -29,24 +29,18 @@ import useCouponsStore from "../../store/coupons";
 import DiscountModal from "./discount";
 import { ShopContext } from "../../context";
 import useXummStore from "../../store/xumm";
+import axios from "axios";
 
 const XrpModal = (props) => {
 
+    const [sender, setSender] = useState('')
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isDiscountCodeModalOpen,
         onOpen: onDiscountCodeModalOpen,
         onClose: onDiscountCodeModalClose,
     } = useDisclosure();
-
-    const [buyerAddress, setBuyerAddress] = useState("");
-
-    // const [code, setCode] = useState("");
-    var code;
-
-    // var buyerAddress;
-
-
+    const [buyyerAddress, setBuyyerAddress] = useState("");
     const shop = useContext(ShopContext);
     const xrpPaymentState = useXRPStore((state) => state.xrpPaymentState);
     const postXRPpayment = useXRPStore((state) => state.postXRPpayment);
@@ -59,26 +53,18 @@ const XrpModal = (props) => {
     );
     const toast = useToast();
 
-    // const submitHandler = () => {
-    //     const XRPbuyerAddress = buyyerAddress;
-    //     if (XRPbuyerAddress.length === 0) {
-    //         return;
-    //     } else {
-    //         postXRPpayment({ XRPbuyerAddress });
-    //     }
-    // };
+    const submitHandler = () => {
+        const XRPbuyerAddress = buyyerAddress;
+        if (XRPbuyerAddress.length === 0) {
+            return;
+        } else {
+            postXRPpayment({ XRPbuyerAddress });
+        }
+    };
 
     const onModalClose = () => {
         resetXRPPaymentState();
         onClose();
-    };
-
-    const onDiscountModalClose = () => {
-        console.log('onDiscountModalClose', code, buyerAddress)
-
-        postCouponAction(code, buyerAddress)
-
-        onDiscountCodeModalClose();
     };
 
     const onPayClick = async ({ lookId }) => {
@@ -91,19 +77,23 @@ const XrpModal = (props) => {
                 console.log("Connected.....");
             };
 
+
+
             client.onmessage = async (e) => {
-                // console.log(e);
+                console.log(e);
                 const newObj = await JSON.parse(e.data);
-                // console.log(e.data, newObj);
-                // console.log(newObj.txid);
+                console.log(e.data, newObj);
+                console.log(newObj.txid);
                 const txid = await newObj.txid;
-                // console.log(txid);
+                console.log(txid);
                 if (txid !== undefined) {
                     const res = await verifyXummPayment({ txid });
-                    setBuyerAddress(res.result.Account)
-                    // buyerAddress = res.result.Account
+                    setSender(res.result.Account)
                     onModalClose();
                     getCouponAction({ txid, shop, lookId });
+                    console.log(txid, "In If")
+                }
+                if (couponState.get.success.ok) {
                     onDiscountCodeModalOpen();
                 }
             };
@@ -189,7 +179,7 @@ const XrpModal = (props) => {
         }
     };
 
-    const renderDiscountCode = () => {
+    const renderDiscountCode = async () => {
         // console.log(couponState.get);
 
         if (couponState.get.loading) {
@@ -224,9 +214,11 @@ const XrpModal = (props) => {
             );
         } else if (couponState.get.success.ok) {
             const { data: couponData } = couponState.get.success;
-            // console.log(couponData);
-            // setCode(couponData?.discount?.code)
-            code = couponData?.discount?.code;
+            const code = couponData.discount?.code
+            const customerWallet = sender
+            postCouponAction(code, customerWallet)
+
+
             return (
                 <Alert
                     status="success"
@@ -285,7 +277,7 @@ const XrpModal = (props) => {
 
             <Modal
                 isOpen={isDiscountCodeModalOpen}
-                onClose={onDiscountModalClose}
+                onClose={onDiscountCodeModalClose}
                 size="xl"
             >
                 <ModalOverlay />
