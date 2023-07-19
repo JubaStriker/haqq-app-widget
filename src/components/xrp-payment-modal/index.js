@@ -59,14 +59,7 @@ const XrpModal = (props) => {
     );
     const toast = useToast();
 
-    // const submitHandler = () => {
-    //     const XRPbuyerAddress = buyyerAddress;
-    //     if (XRPbuyerAddress.length === 0) {
-    //         return;
-    //     } else {
-    //         postXRPpayment({ XRPbuyerAddress });
-    //     }
-    // };
+
 
     const onModalClose = () => {
         resetXRPPaymentState();
