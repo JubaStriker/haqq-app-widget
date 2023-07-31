@@ -32,6 +32,7 @@ import HbarModal from "../../components/hbar-payment-modal";
 import "../../embed.css";
 import axios from "axios";
 import XrpModal from "../../components/xrp-payment-modal";
+import NearModal from "../../components/near-payment-modal";
 
 const ProductsModal = (props) => {
   const { isOpen, onClose, productIds = [], lookId } = props;
@@ -334,6 +335,12 @@ const EmbedRoute = (props) => {
                   {look.blockchain === 'ripple' ?
 
                     <XrpModal lookXrpPrice={look.xrpPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
+                    ""
+                  }
+
+                  {look.blockchain === 'near' ?
+
+                    <NearModal lookNearPrice={look.nearPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
                     ""
                   }
 

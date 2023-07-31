@@ -12,6 +12,8 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.26.1",
+    "buffer": "^6.0.3",
+    "flickity": "^2.3.0",
     "framer-motion": "^6.2.8",
     "hashconnect": "^0.2.4",
     "react": "^17.0.2",
