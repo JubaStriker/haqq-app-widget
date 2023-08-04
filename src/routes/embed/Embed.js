@@ -340,7 +340,7 @@ const EmbedRoute = (props) => {
 
                   {look.blockchain === 'near' ?
 
-                    <NearModal lookNearPrice={look.nearPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
+                    <NearModal lookNearPrice={look.nearPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} cryptoReceiver={look.cryptoReceiver} /> :
                     ""
                   }
 
