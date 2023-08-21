@@ -33,6 +33,7 @@ import "../../embed.css";
 import axios from "axios";
 import XrpModal from "../../components/xrp-payment-modal";
 import NearModal from "../../components/near-payment-modal";
+import XlmModal from "../../components/xlm-payment-modal";
 
 const ProductsModal = (props) => {
   const { isOpen, onClose, productIds = [], lookId } = props;
@@ -334,13 +335,23 @@ const EmbedRoute = (props) => {
 
                   {look.blockchain === 'ripple' ?
 
-                    <XrpModal lookXrpPrice={look.xrpPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
+                    <XrpModal lookXrpPrice={look.cryptoPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
                     ""
                   }
 
                   {look.blockchain === 'near' ?
 
-                    <NearModal lookNearPrice={look.nearPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} cryptoReceiver={look.cryptoReceiver} /> :
+                    <NearModal lookNearPrice={look.cryptoPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} cryptoReceiver={look.cryptoReceiver} /> :
+                    ""
+                  }
+                  {look.blockchain === 'stellar' ?
+
+                    <XlmModal
+                      lookCryptoPrice={look.cryptoPrice || look.price}
+                      lookImage={look.medias}
+                      lookId={look.id || look.objectId}
+                      lookName={look.name}
+                    /> :
                     ""
                   }
 
