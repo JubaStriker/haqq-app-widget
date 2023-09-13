@@ -57,6 +57,7 @@ const ProductsModal = (props) => {
         </SimpleGrid>
       );
     } else if (products.get.failure.error) {
+      console.log("Failed to load products", products)
       return (
         <Box>
           <Flex direction="column" align="center">

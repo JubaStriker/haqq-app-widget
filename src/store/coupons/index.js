@@ -8,7 +8,7 @@ const INITIAL_COUPONS_STATE = {
     loading: false,
     success: {
       ok: false,
-      data: {},
+      data: {}
     },
     failure: {
       error: false,
@@ -25,12 +25,28 @@ const INITIAL_COUPONS_STATE = {
       error: false,
       message: "",
     },
-  }
+  },
+  storePaymentTxId: ''
+
 };
 
 const useCouponsStore = create((set, get) => ({
+
   couponState: INITIAL_COUPONS_STATE,
-  getCouponAction: async ({ txid, shop, lookId } = {}) => {
+  storePaymentTxId: (txid) => {
+    set(
+      produce((state) => ({
+        ...state,
+        couponState: {
+          ...state.couponState,
+          storePaymentTxId: txid,
+        },
+      }))
+    );
+  },
+
+  getCouponAction: async ({ txid, shop, lookId }) => {
+    console.log("In coupon store", txid, shop, lookId);
     set(
       produce((state) => ({
         ...state,

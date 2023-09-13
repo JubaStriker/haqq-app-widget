@@ -24,9 +24,12 @@ import useHABRStore from "../../store/hbar";
 import DiscountModal from "./discount";
 import { ShopContext } from "../../context";
 import Carousel from "../../components/carousel";
+import useCouponsStore from "../../store/coupons";
 
 const HbarModal = (props) => {
-  let txid = "";
+
+  const [txid, setTxid] = useState('')
+  const [testState, setTestState] = useState('start')
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [lookHbarPrice, setLookHbarPrice] = useState();
   const {
@@ -40,6 +43,9 @@ const HbarModal = (props) => {
   const hbarPaymentState = useHABRStore((state) => state.hbarPaymentState);
   const postHBARpayment = useHABRStore((state) => state.postHBARpayment);
   const hbarCreateToken = useHABRStore((state) => state.hbarCreateToken);
+  const { storePaymentTxId, couponState } = useCouponsStore((state) => state);
+
+  console.log(couponState.storePaymentTxId)
 
   useEffect(() => {
     const fetchHbarPrice = async () => {
@@ -70,7 +76,7 @@ const HbarModal = (props) => {
 
   const postHbarPaymentHandler = async () => {
     const { accountId, network, topic } = hbarWalletState.get.success.data;
-    postHBARpayment({ topic, accountId, network, lookHbarPrice, shop });
+    const resp = await postHBARpayment({ topic, accountId, network, lookHbarPrice, shop });
   };
 
   const createToken = async () => {
@@ -84,8 +90,10 @@ const HbarModal = (props) => {
     });
   };
 
+
   const renderWalletStatus = () => {
     if (hbarWalletState.get.loading) {
+
       return (
         <>
           <Box minH={"100px"} width="20%" m="auto" p={5}>
@@ -145,7 +153,7 @@ const HbarModal = (props) => {
                 alignItems="center"
                 justifyContent="center"
               >
-                Wallet Address that HBAR transfering from{" "}
+                Wallet Address that HBAR transferring from{" "}
                 {hbarWalletState.get.success.data.accountId}
               </Box>
 
@@ -198,34 +206,20 @@ const HbarModal = (props) => {
         </>
       );
     } else if (hbarPaymentState.post.success.ok) {
-      txid = hbarPaymentState?.post?.success?.data?.transactionId;
+      const txid = hbarPaymentState?.post?.success?.data?.transactionId
+      console.log(txid);
+      storePaymentTxId(txid)
       onModalClose();
-      console.log(hbarPaymentState.post.success, props);
+
       setTimeout(() => onDiscountCodeModalOpen(), 500);
-      // return (
-      //   <DiscountModal
-      //     txid={hbarPaymentState.post.success.data.transactionHash}
-      //     lookId={props.lookId}
-      //   />
-      // );
+
       return null;
     }
-    // else {
-    //   return (
-    //     <Box p={10}>
-    //       <Button
-    //         colorScheme={"teal"}
-    //         onClick={() => connectWallet()}
-    //         isFullWidth
-    //       >
-    //         Connect to Wallet
-    //       </Button>
-    //     </Box>
-    //   );
-    // }
+
   };
 
   return (
+
     <>
       <Button onClick={() => connectWallet()} isFullWidth>
         Pay {lookHbarPrice ? lookHbarPrice : "10"} HABR to get 100% off
@@ -258,7 +252,7 @@ const HbarModal = (props) => {
           </ModalHeader>
 
           <ModalBody>
-            <DiscountModal txid={txid} lookId={props.lookId} />
+            <DiscountModal txid={couponState.storePaymentTxId} lookId={props.lookId} />
           </ModalBody>
         </ModalContent>
       </Modal>

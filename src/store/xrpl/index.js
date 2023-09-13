@@ -1,7 +1,6 @@
 import create from "zustand";
 import produce from "immer";
 
-console.log(window.xrpl, "Window")
 
 const client = new window.xrpl.Client("wss://s.altnet.rippletest.net:51233");
 const wallet = window.xrpl.Wallet.fromSeed("spkKJ7x19doar9wzDMpBsAP9cnA4W");

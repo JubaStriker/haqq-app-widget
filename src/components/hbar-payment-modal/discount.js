@@ -25,7 +25,6 @@ const DiscountModal = (props) => {
   // console.log(qwe);
 
   useEffect(() => {
-    console.log("ererere");
     getCouponAction({ shop, lookId: props.lookId, txid: props.lookId }); //
   }, []);
 
@@ -61,7 +60,6 @@ const DiscountModal = (props) => {
     );
   } else if (couponState.get.success.ok) {
     const { data: couponData } = couponState.get.success;
-    console.log(couponData);
     return (
       <Alert
         status="success"
@@ -79,12 +77,12 @@ const DiscountModal = (props) => {
           Here is your discount code!
         </AlertTitle>
         <AlertDescription maxWidth="sm">
-          Thank you for paying with XRP. Your Transaction is confirmed. Your TX
+          Thank you for paying with HBAR. Your Transaction is confirmed. Your TX
           has been saved. Please find your one-time discount code below.{" "}
           <Link
             color="teal"
             target="_blank"
-            href={`${process.env.REACT_APP_XRP_TRANSACTION_REFFERENCE}transactions/${props.txid}`}
+            href={`${process.env.REACT_APP_HBAR_TRANSACTION_REFFERENCE}/${props.txid}`}
           >
             Check Transaction Refference here
           </Link>

@@ -52,7 +52,7 @@ const INITIAL_LOOKS_STATE = {
 
 const useLooksStore = create((set, get) => ({
 	looks: INITIAL_LOOKS_STATE,
-	getLooks: async({ id = '', shop = window.lookbook.shop } = {}) => {
+	getLooks: async ({ id = '', shop = window.lookbook.shop } = {}) => {
 		set(produce(state => ({
 			...state,
 			looks: {
@@ -69,7 +69,7 @@ const useLooksStore = create((set, get) => ({
 			// Parse.Cloud.run('get_looks', {
 			// 	shop, id
 			// })
-		
+
 			const { data } = await axios.get(`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_looks?shop=${shop}&id=${id}`);
 			set(produce(state => ({
 				...state,
@@ -84,12 +84,12 @@ const useLooksStore = create((set, get) => ({
 					}
 				}
 			})));
-			// console.log(id)
+			console.log(data);
 			return data;
 
 		} catch (e) {
 			console.error(e)
-		
+
 			set(produce(state => ({
 				...state,
 				looks: {
@@ -118,7 +118,7 @@ const useLooksStore = create((set, get) => ({
 		})))
 
 		try {
-			
+
 			const { data } = await axios.post(`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/post_looks`, {
 				shop,
 				name,
@@ -261,4 +261,4 @@ const useLooksStore = create((set, get) => ({
 }));
 
 export default useLooksStore;
-	
+

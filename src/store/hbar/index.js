@@ -128,48 +128,48 @@ const useHABRStore = create((set, get) => ({
               );
             }
           }
-        } catch (e) {}
+        } catch (e) { }
       };
 
-      // const initData = await hashConnect.init(
-      //   appMetadata,
-      //   `${process.env.REACT_APP_HASHCONNECT_NETWORK}`,
-      //   false
-      // );
+      const initData = await hashConnect.init(
+        appMetadata,
+        `${process.env.REACT_APP_HASHCONNECT_NETWORK}`,
+        false
+      );
 
-      // hashConnect.foundExtensionEvent.once((walletMetadata) => {
-      //   hashConnect.connectToLocalWallet(
-      //     initData.pairingString,
-      //     walletMetadata
-      //   );
-      // });
+      hashConnect.foundExtensionEvent.once((walletMetadata) => {
+        hashConnect.connectToLocalWallet(
+          initData.pairingString,
+          walletMetadata
+        );
+      });
 
-      // let walletAccountID = "";
-      // hashConnect.pairingEvent.once((pairingData) => {
-      //   pairingData.accountIds.forEach((id) => {
-      //     walletAccountID = id;
-      //   });
-      //   set(
-      //     produce((state) => ({
-      //       ...state,
-      //       hbarWalletState: {
-      //         ...state.hbarWalletState,
-      //         get: {
-      //           ...INITIAL_WALLET_STATE.get,
-      //           loading: false,
-      //           success: {
-      //             data: {
-      //               topic: pairingData.topic,
-      //               accountId: walletAccountID,
-      //               network: pairingData.network,
-      //             },
-      //             ok: true,
-      //           },
-      //         },
-      //       },
-      //     }))
-      //   );
-      // });
+      let walletAccountID = "";
+      hashConnect.pairingEvent.once((pairingData) => {
+        pairingData.accountIds.forEach((id) => {
+          walletAccountID = id;
+        });
+        set(
+          produce((state) => ({
+            ...state,
+            hbarWalletState: {
+              ...state.hbarWalletState,
+              get: {
+                ...INITIAL_WALLET_STATE.get,
+                loading: false,
+                success: {
+                  data: {
+                    topic: pairingData.topic,
+                    accountId: walletAccountID,
+                    network: pairingData.network,
+                  },
+                  ok: true,
+                },
+              },
+            },
+          }))
+        );
+      });
     } catch (e) {
       set(
         produce((state) => ({
@@ -212,10 +212,15 @@ const useHABRStore = create((set, get) => ({
         },
       }))
     );
+    let txdata;
     try {
-      const walletAddress = await axios.get(
-        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}&blockchain=hedera`
       );
+
+
+
+      const walletAddress = data.walletAddress;
 
       const walletTransferMessage = {
         method: "transfer",
@@ -233,12 +238,52 @@ const useHABRStore = create((set, get) => ({
 
       window.onmessage = async function (e) {
         try {
+
           const parsedData = JSON.parse(e.data);
           if (parsedData.platform === "hbar-shop") {
-            if (
-              parsedData.method === "transfer" &&
-              parsedData.status === "success"
-            ) {
+            if (parsedData.method === "transfer") {
+              console.log("Transfer")
+              const {
+                topic,
+                accountId,
+                network,
+                lookHbarPrice,
+                shop,
+                walletAddress,
+              } = parsedData.data;
+
+              const provider = hashConnect.getProvider(network, topic, accountId);
+              const signer = hashConnect.getSigner(provider);
+
+              const accountInfo = await fetch(
+                // `${process.env.REACT_APP_HEDERA_ACCOUNT_VERIFY}api/v1/accounts?account.id=${accountId}`
+                `https://testnet.mirrornode.hedera.com/api/v1/accounts?account.id=${accountId}`
+              );
+              const accountResponse = await accountInfo.json();
+
+              // console.log(accountResponse);
+              // console.log(accountResponse.accounts[0].key.key);
+
+              const key = PublicKey.fromString(
+                accountResponse.accounts[0].key.key
+              );
+
+              const trans = await new TransferTransaction()
+                .addHbarTransfer(
+                  AccountId.fromString(accountId),
+                  Hbar.from(-lookHbarPrice, HbarUnit.TINYBAR)
+                )
+                .addHbarTransfer(
+                  AccountId.fromString(walletAddress),
+                  Hbar.from(lookHbarPrice, HbarUnit.TINYBAR)
+                )
+                .freezeWithSigner(signer);
+
+              // console.log("Transfer tx receipt: ", trans);
+              const resp = await trans.executeWithSigner(signer);
+
+
+
               set(
                 produce((state) => ({
                   ...state,
@@ -248,16 +293,19 @@ const useHABRStore = create((set, get) => ({
                       ...INITIAL_HBAR_STATE.post,
                       loading: false,
                       success: {
-                        data: parsedData.data,
+                        data: resp,
                         ok: true,
                       },
                     },
                   },
-                }))
-              );
+                })));
+
+
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error(e)
+        }
       };
     } catch (e) {
       console.log(e.message);
@@ -298,7 +346,7 @@ const useHABRStore = create((set, get) => ({
     );
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}`
+        `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_shop?shop=${shop}blockchain=hedera`
       );
       try {
         console.log(data.walletToken);
@@ -381,7 +429,7 @@ const useHABRStore = create((set, get) => ({
         .freezeWithSigner(signer);
 
       const resp = await tokenTransferTx.executeWithSigner(signer);
-      console.log("Finally transfered Token", resp);
+      console.log("Finally transferred Token", resp);
 
       set(
         produce((state) => ({
