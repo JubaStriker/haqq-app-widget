@@ -70,7 +70,7 @@ const useLooksStore = create((set, get) => ({
 			// 	shop, id
 			// })
 
-			const { data } = await axios.get(`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_looks?shop=${shop}&id=${id}`);
+			const { data } = await axios.get(`http://localhost:8000/api/get_looks?shop=jubair-development-store.myshopify.com&id=`);
 			set(produce(state => ({
 				...state,
 				looks: {

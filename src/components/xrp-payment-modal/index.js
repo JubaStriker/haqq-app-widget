@@ -48,12 +48,13 @@ const XrpModal = (props) => {
 
 
     const shop = useContext(ShopContext);
+
     const xrpPaymentState = useXRPStore((state) => state.xrpPaymentState);
     const postXRPpayment = useXRPStore((state) => state.postXRPpayment);
     const { getXummPaymentPromptAction, xummState, verifyXummPayment } = useXummStore(
         (state) => state
     );
-    const { getCouponAction, couponState, postCouponAction } = useCouponsStore((state) => state);
+    const { getCouponAction, couponState, postCouponAction, storePaymentTxId } = useCouponsStore((state) => state);
     const resetXRPPaymentState = useXRPStore(
         (state) => state.resetXRPPaymentState
     );
@@ -78,6 +79,8 @@ const XrpModal = (props) => {
         try {
             onOpen();
             const data = await getXummPaymentPromptAction({ lookId, shop });
+
+            console.log(data);
             const client = new WebSocket(data.status);
 
             client.onopen = () => {
@@ -96,11 +99,14 @@ const XrpModal = (props) => {
                     setBuyerAddress(res.result.Account)
                     // buyerAddress = res.result.Account
                     onModalClose();
+                    console.log(txid);
+                    storePaymentTxId(txid)
                     getCouponAction({ txid, shop, lookId });
                     onDiscountCodeModalOpen();
                 }
             };
         } catch (e) {
+            console.log("Error: " + e.message);
             toast({
                 title: "Something went wrong. Please retry again.",
                 status: "error",
@@ -242,9 +248,9 @@ const XrpModal = (props) => {
                         <Link
                             color="teal"
                             target="_blank"
-                            href={`${process.env.REACT_APP_XRP_TRANSACTION_REFFERENCE}transactions/${couponData?.tx?.result.hash}`}
+                            href={`${process.env.REACT_APP_XRP_TRANSACTION_REFFERENCE}transactions/${couponState.storePaymentTxId}`}
                         >
-                            Check Transaction Refference here
+                            Check Transaction Reference here
                         </Link>
                         <Heading>{couponData.discount?.code}</Heading>
                     </AlertDescription>

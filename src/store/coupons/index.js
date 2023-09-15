@@ -65,6 +65,7 @@ const useCouponsStore = create((set, get) => ({
         `${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/post_coupon`,
         { txid, shop, lookId }
       );
+      console.log(data);
       set(
         produce((state) => ({
           ...state,
@@ -81,7 +82,6 @@ const useCouponsStore = create((set, get) => ({
           },
         }))
       );
-      console.log("Coupon store", data);
       return data;
     }
     catch (e) {

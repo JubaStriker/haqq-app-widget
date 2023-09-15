@@ -28,8 +28,6 @@ import useCouponsStore from "../../store/coupons";
 
 const HbarModal = (props) => {
 
-  const [txid, setTxid] = useState('')
-  const [testState, setTestState] = useState('start')
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [lookHbarPrice, setLookHbarPrice] = useState();
   const {
@@ -45,7 +43,7 @@ const HbarModal = (props) => {
   const hbarCreateToken = useHABRStore((state) => state.hbarCreateToken);
   const { storePaymentTxId, couponState } = useCouponsStore((state) => state);
 
-  console.log(couponState.storePaymentTxId)
+  // console.log(couponState.storePaymentTxId)
 
   useEffect(() => {
     const fetchHbarPrice = async () => {
