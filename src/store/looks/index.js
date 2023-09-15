@@ -71,6 +71,7 @@ const useLooksStore = create((set, get) => ({
 			// })
 
 			const { data } = await axios.get(`${process.env.REACT_APP_API_SHOPLOOKS_SERVER_URL}/api/get_looks?shop=${shop}&id=${id}`);
+
 			set(produce(state => ({
 				...state,
 				looks: {
@@ -84,7 +85,7 @@ const useLooksStore = create((set, get) => ({
 					}
 				}
 			})));
-			console.log(data);
+			console.log(data, id);
 			return data;
 
 		} catch (e) {

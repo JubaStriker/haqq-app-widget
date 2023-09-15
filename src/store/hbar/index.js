@@ -282,23 +282,47 @@ const useHABRStore = create((set, get) => ({
               // console.log("Transfer tx receipt: ", trans);
               const resp = await trans.executeWithSigner(signer);
 
-
-
-              set(
-                produce((state) => ({
-                  ...state,
-                  hbarPaymentState: {
-                    ...state.hbarPaymentState,
-                    post: {
-                      ...INITIAL_HBAR_STATE.post,
-                      loading: false,
-                      success: {
-                        data: resp,
-                        ok: true,
+              if (resp) {
+                set(
+                  produce((state) => ({
+                    ...state,
+                    hbarPaymentState: {
+                      ...state.hbarPaymentState,
+                      post: {
+                        ...INITIAL_HBAR_STATE.post,
+                        loading: false,
+                        success: {
+                          data: resp,
+                          ok: true,
+                        },
                       },
                     },
-                  },
-                })));
+                  })));
+              }
+              else {
+                set(
+                  produce((state) => ({
+                    ...state,
+                    hbarPaymentState: {
+                      ...state.hbarPaymentState,
+                      post: {
+                        ...INITIAL_HBAR_STATE.post,
+                        loading: false,
+                        success: {
+                          ok: false,
+                        },
+                        failure: {
+                          error: false,
+                          message: "Payment rejected",
+                        },
+                      },
+                    },
+                  }))
+                );
+              }
+
+
+
 
 
             }
