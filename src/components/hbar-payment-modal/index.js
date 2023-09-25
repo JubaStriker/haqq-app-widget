@@ -19,6 +19,8 @@ import {
   GridItem,
   Center,
   Spinner,
+  ButtonGroup,
+  Link,
 } from "@chakra-ui/react";
 import useHABRStore from "../../store/hbar";
 import DiscountModal from "./discount";
@@ -219,9 +221,16 @@ const HbarModal = (props) => {
   return (
 
     <>
-      <Button onClick={() => connectWallet()} isFullWidth>
-        Pay {lookHbarPrice ? lookHbarPrice : "10"} HABR to get 100% off
-      </Button>
+
+      <ButtonGroup variant='outline' spacing='2'>
+        <Button onClick={() => connectWallet()} isFullWidth>
+          Pay {lookHbarPrice ? lookHbarPrice : "10"} HBAR to get 100% off
+        </Button>
+        <Link href='https://global.transak.com/' isExternal>
+          <Button>Buy Hbar</Button>
+        </Link>
+      </ButtonGroup>
+
 
       <Modal isOpen={isOpen} onClose={onModalClose} size="xl">
         <ModalOverlay />
