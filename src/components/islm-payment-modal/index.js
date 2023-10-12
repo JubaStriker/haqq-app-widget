@@ -40,8 +40,6 @@ const IslmModal = (props) => {
         onClose: onDiscountCodeModalClose,
     } = useDisclosure();
 
-    const [buyerAddress, setBuyerAddress] = useState("");
-
     var code;
     const { sdk, provider } = useSDK();
 
@@ -86,13 +84,11 @@ const IslmModal = (props) => {
         (state) => state
     );
 
-    const { couponState, postCouponAction, getCouponAction, storePaymentTxId } = useCouponsStore((state) => state);
+    const { couponState, getCouponAction, storePaymentTxId } = useCouponsStore((state) => state);
     const resetXRPPaymentState = useXRPStore(
         (state) => state.resetXRPPaymentState
     );
     const toast = useToast();
-
-
 
     const onModalClose = () => {
         resetXRPPaymentState();
@@ -107,20 +103,20 @@ const IslmModal = (props) => {
             provider
         })
         const lookId = props.lookId;
-
-        console.log(txid);
         if (txid) {
             storePaymentTxId(txid);
             getCouponAction({ txid, shop, lookId });
             onDiscountCodeModalOpen();
+        } else {
+            toast({
+                title: "Something went wrong. Please retry again.",
+                status: "error",
+                isClosable: true,
+            });
         }
     }
 
     const onDiscountModalClose = () => {
-        console.log('onDiscountModalClose', code, buyerAddress)
-
-        postCouponAction(code, buyerAddress)
-
         onDiscountCodeModalClose();
     };
 
@@ -152,7 +148,6 @@ const IslmModal = (props) => {
                             color="blue.500"
                             size="xl"
                         />
-
                     </Box>
                 </>
             );
@@ -256,8 +251,6 @@ const IslmModal = (props) => {
     };
 
     const renderDiscountCode = () => {
-        // console.log(couponState.get);
-
         if (couponState.get.loading) {
             return (
                 <>
@@ -290,8 +283,6 @@ const IslmModal = (props) => {
             );
         } else if (couponState.get.success.ok) {
             const { data: couponData } = couponState.get.success;
-            // console.log(couponData);
-            // setCode(couponData?.discount?.code)
             code = couponData?.discount?.code;
             return (
                 <Alert
