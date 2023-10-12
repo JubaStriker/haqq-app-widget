@@ -46,7 +46,6 @@ const useCouponsStore = create((set, get) => ({
   },
 
   getCouponAction: async ({ txid, shop, lookId }) => {
-    console.log("In coupon store", txid, shop, lookId);
     set(
       produce((state) => ({
         ...state,

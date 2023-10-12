@@ -18,7 +18,7 @@ const INITIAL_XUMM_STATE = {
 
 const useXummStore = create((set, get) => ({
     xummState: INITIAL_XUMM_STATE,
-    getXummPaymentPromptAction: async ({ lookId, shop = 'jubair-development-store.myshopify.com' } = {}) => {
+    getXummPaymentPromptAction: async ({ lookId, shop } = {}) => {
 
         set(
             produce((state) => ({

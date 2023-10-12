@@ -48,6 +48,7 @@ const XrpModal = (props) => {
 
 
     const shop = useContext(ShopContext);
+    console.log(shop)
 
     const xrpPaymentState = useXRPStore((state) => state.xrpPaymentState);
     const postXRPpayment = useXRPStore((state) => state.postXRPpayment);
@@ -216,7 +217,7 @@ const XrpModal = (props) => {
                     <Text>
                         It looks like your payment is complete but our store failed to
                         generate a coupon for you. Please contact store support before
-                        reinitaing payment.
+                        re-initiating payment.
                     </Text>
                     <Text>{couponState.get.failure.message}</Text>
                 </>

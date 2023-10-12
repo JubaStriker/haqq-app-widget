@@ -222,7 +222,7 @@ const HbarModal = (props) => {
 
     <>
 
-      <ButtonGroup variant='outline' spacing='2'>
+      <ButtonGroup spacing='2'>
         <Button onClick={() => connectWallet()} isFullWidth>
           Pay {lookHbarPrice ? lookHbarPrice : "10"} HBAR to get 100% off
         </Button>
