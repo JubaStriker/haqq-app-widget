@@ -1,5 +1,6 @@
 import create from "zustand";
 import produce from "immer";
+import Web3 from 'web3';
 
 
 const INITIAL_ISLM_STATE = {
@@ -26,12 +27,14 @@ const useISLMStore = create((set, get) => ({
             }))
         );
     },
-    postIslmpayment: async ({ XRPMerchantAddress }) => {
+    postIslmPayment: async ({ cryptoReceiver, price, sender, provider }) => {
+
+
         set(
             produce((state) => ({
                 ...state,
-                xrpPaymentState: {
-                    ...state.xrpPaymentState,
+                islmPaymentState: {
+                    ...state.islmPaymentState,
                     post: {
                         ...INITIAL_ISLM_STATE.post,
                         loading: true,
@@ -39,9 +42,24 @@ const useISLMStore = create((set, get) => ({
                 },
             }))
         );
-        try {
 
-            // console.log(tx);
+        const etherAmount = price; // 1 Ether
+        const weiAmount = Web3.utils.toWei(etherAmount.toString(), 'ether');
+        var intNumber = parseInt(weiAmount);
+        var hexNumber = intNumber.toString(16);
+
+        const to = cryptoReceiver;
+        const transactionParameters = {
+            to,
+            from: sender,
+            value: `0x${hexNumber}`,
+        };
+
+        try {
+            const txHash = await provider?.request({
+                method: "eth_sendTransaction",
+                params: [transactionParameters],
+            });
             set(
                 produce((state) => ({
                     ...state,
@@ -52,16 +70,16 @@ const useISLMStore = create((set, get) => ({
                             loading: false,
                             success: {
                                 ok: true,
-                                data: {
-
-                                },
+                                data: txHash,
                             },
                         },
                     },
                 }))
             );
+            return txHash;
+
         } catch (e) {
-            console.log(e.message);
+            console.log(e);
             set(
                 produce((state) => ({
                     ...state,
@@ -70,12 +88,9 @@ const useISLMStore = create((set, get) => ({
                         post: {
                             ...INITIAL_ISLM_STATE.post,
                             loading: false,
-                            success: {
-                                ok: false,
-                            },
                             failure: {
-                                error: false,
-                                message: "Please Verify the Merchant Address",
+                                error: true,
+                                message: e.message,
                             },
                         },
                     },

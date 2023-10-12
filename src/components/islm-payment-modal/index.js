@@ -21,15 +21,13 @@ import {
     Center,
     Spinner,
     useToast,
-    Link,
-    Flex,
+    Link
 } from "@chakra-ui/react";
 import useXRPStore from "../../store/xrpl";
 import useCouponsStore from "../../store/coupons";
 import { ShopContext } from "../../context";
-import useXummStore from "../../store/xumm";
 import { useSDK } from '@metamask/sdk-react';
-import Web3 from 'web3';
+import useISLMStore from "../../store/islm";
 
 
 const IslmModal = (props) => {
@@ -45,7 +43,7 @@ const IslmModal = (props) => {
     const [buyerAddress, setBuyerAddress] = useState("");
 
     var code;
-    const { sdk, connected, connecting, provider, chainId } = useSDK();
+    const { sdk, provider } = useSDK();
 
     const connect = async () => {
         try {
@@ -84,10 +82,11 @@ const IslmModal = (props) => {
 
 
     const shop = useContext(ShopContext);
-    const { getXummPaymentPromptAction, xummState, verifyXummPayment } = useXummStore(
+    const { postIslmPayment, islmPaymentState } = useISLMStore(
         (state) => state
     );
-    const { getCouponAction, couponState, postCouponAction, storePaymentTxId } = useCouponsStore((state) => state);
+
+    const { couponState, postCouponAction, getCouponAction, storePaymentTxId } = useCouponsStore((state) => state);
     const resetXRPPaymentState = useXRPStore(
         (state) => state.resetXRPPaymentState
     );
@@ -100,6 +99,23 @@ const IslmModal = (props) => {
         onClose();
     };
 
+    const payment = async () => {
+        const txid = await postIslmPayment({
+            cryptoReceiver: props.cryptoReceiver,
+            price: props.lookCryptoPrice,
+            sender: account,
+            provider
+        })
+        const lookId = props.lookId;
+
+        console.log(txid);
+        if (txid) {
+            storePaymentTxId(txid);
+            getCouponAction({ txid, shop, lookId });
+            onDiscountCodeModalOpen();
+        }
+    }
+
     const onDiscountModalClose = () => {
         console.log('onDiscountModalClose', code, buyerAddress)
 
@@ -108,35 +124,11 @@ const IslmModal = (props) => {
         onDiscountCodeModalClose();
     };
 
-    const onPayClick = async ({ lookId }) => {
+    const onPayClick = async () => {
         try {
             connect()
             onOpen();
-            console.log(account)
-            // const client = new WebSocket(data.status);
 
-            // client.onopen = () => {
-            //     console.log("Connected.....");
-            // };
-
-            // client.onmessage = async (e) => {
-            //     // console.log(e);
-            //     const newObj = await JSON.parse(e.data);
-            //     // console.log(e.data, newObj);
-            //     // console.log(newObj.txid);
-            //     const txid = await newObj.txid;
-            //     // console.log(txid);
-            //     if (txid !== undefined) {
-            //         const res = await verifyXummPayment({ txid });
-            //         setBuyerAddress(res.result.Account)
-            //         // buyerAddress = res.result.Account
-            //         onModalClose();
-            //         console.log(txid);
-            //         storePaymentTxId(txid)
-            //         getCouponAction({ txid, shop, lookId });
-            //         onDiscountCodeModalOpen();
-            //     }
-            // };
         } catch (e) {
             console.log("Error: " + e.message);
             toast({
@@ -149,8 +141,7 @@ const IslmModal = (props) => {
     };
 
     const renderPaymentStatus = () => {
-        if (xummState.get.loading) {
-            // return <SkeletonText mt="4" noOfLines={4} spacing="4" />;
+        if (islmPaymentState.post.loading) {
             return (
                 <>
                     <Box minH={"100px"} width="20%" m="auto" p={5}>
@@ -161,18 +152,18 @@ const IslmModal = (props) => {
                             color="blue.500"
                             size="xl"
                         />
-                        ;
+
                     </Box>
                 </>
             );
-        } else if (xummState.get.failure.error) {
+        } else if (islmPaymentState.post.failure.error) {
             return (
                 <>
                     <Alert status="error">
                         <AlertIcon />
                         <Heading>Something went wrong!</Heading>
                     </Alert>
-                    <Text>{xummState.get.failure.message}</Text>
+                    <Text>{islmPaymentState.post.failure.message}</Text>
                 </>
             );
         } else if (true) {
@@ -210,13 +201,45 @@ const IslmModal = (props) => {
                                                 </Center>
                                             </GridItem>
                                         </Grid>
-                                    </Button></>
+                                    </Button>
+                                </>
                             }
 
 
 
                             {provider?.chainId === '0xd3c3' ?
                                 <>
+                                    <Text size="sm" fontWeight="semibold" textAlign="center" mb={'6'}>
+                                        Connected wallet: {' '}
+                                        <Text as={'span'} fontSize="lg" fontWeight="bold" textAlign="center" mb={'6'}
+                                        >
+
+                                            {account?.slice(0, 4)}.....{account?.slice(35, 50)}
+                                        </Text>
+                                    </Text>
+
+                                    <Button
+                                        onClick={payment}
+                                        isFullWidth
+                                        mb={'4'}
+
+                                    >
+                                        <Grid>
+                                            <GridItem>
+                                                <Center>
+                                                    <Text fontSize="lg" fontWeight="bold" textAlign="center">
+                                                        Pay {props.lookCryptoPrice}
+                                                    </Text>
+                                                    <Image src={"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSynmlwrLwR-BROzDeRjTDlb3YsxqM6mcNwHFkMmBjflA&s"} width="25px" height='25px' mx={'1'} />
+                                                    <Text fontSize="lg" fontWeight="bold" textAlign="center">
+                                                        ISLM
+                                                    </Text>
+                                                </Center>
+                                            </GridItem>
+                                        </Grid>
+                                    </Button>
+
+
                                     <Heading size="xl" fontWeight="bold" textAlign="center">
                                         {props.lookName}
                                     </Heading>
@@ -287,12 +310,12 @@ const IslmModal = (props) => {
                         Here is your discount code!
                     </AlertTitle>
                     <AlertDescription maxWidth="sm">
-                        Thank you for paying with XRP. Your Transaction is confirmed. Your
+                        Thank you for paying with ISLM. Your Transaction is confirmed. Your
                         TX has been saved. Please find your one-time discount code below.{" "}
                         <Link
                             color="teal"
                             target="_blank"
-                            href={`${process.env.REACT_APP_XRP_TRANSACTION_REFFERENCE}transactions/${couponState.storePaymentTxId}`}
+                            href={`${process.env.REACT_APP_ISLM_TRANSACTION_REFFERENCE}/${couponState.storePaymentTxId}`}
                         >
                             Check Transaction Reference here
                         </Link>

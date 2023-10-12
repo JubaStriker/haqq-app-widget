@@ -34,7 +34,7 @@ import axios from "axios";
 import XrpModal from "../../components/xrp-payment-modal";
 import NearModal from "../../components/near-payment-modal";
 import XlmModal from "../../components/xlm-payment-modal";
-import IslmModal from "../../components/islm-paument-modal";
+import IslmModal from "../../components/islm-payment-modal";
 
 const ProductsModal = (props) => {
   const { isOpen, onClose, productIds = [], lookId } = props;
@@ -359,6 +359,7 @@ const EmbedRoute = (props) => {
                   {look.blockchain === 'haqq' ?
 
                     <IslmModal
+                      cryptoReceiver={look.cryptoReceiver}
                       lookCryptoPrice={look.cryptoPrice || look.price}
                       lookImage={look.medias}
                       lookId={look.id || look.objectId}
