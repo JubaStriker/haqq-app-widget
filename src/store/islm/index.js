@@ -23,13 +23,11 @@ const useISLMStore = create((set, get) => ({
         set(
             produce((state) => ({
                 ...state,
-                xrpPaymentState: INITIAL_ISLM_STATE,
+                islmPaymentState: INITIAL_ISLM_STATE,
             }))
         );
     },
     postIslmPayment: async ({ cryptoReceiver, price, sender, provider }) => {
-
-
         set(
             produce((state) => ({
                 ...state,
@@ -43,7 +41,7 @@ const useISLMStore = create((set, get) => ({
             }))
         );
 
-        const etherAmount = price; // 1 Ether
+        const etherAmount = price;
         const weiAmount = Web3.utils.toWei(etherAmount.toString(), 'ether');
         var intNumber = parseInt(weiAmount);
         var hexNumber = intNumber.toString(16);

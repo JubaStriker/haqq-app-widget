@@ -28,12 +28,8 @@ import useProductsStore from "../../store/products";
 import { ExternalLinkIcon, } from "@chakra-ui/icons";
 import { ShopContext } from "../../context";
 import Flickity from "react-flickity-component";
-import HbarModal from "../../components/hbar-payment-modal";
 import "../../embed.css";
 import axios from "axios";
-import XrpModal from "../../components/xrp-payment-modal";
-import NearModal from "../../components/near-payment-modal";
-import XlmModal from "../../components/xlm-payment-modal";
 import IslmModal from "../../components/islm-payment-modal";
 
 const ProductsModal = (props) => {
@@ -330,32 +326,6 @@ const EmbedRoute = (props) => {
                   >
                     Shop The Look
                   </Button>
-                  {look.blockchain === 'hedera' ?
-                    <HbarModal lookPrice={look.price} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
-                    ""
-                  }
-
-                  {look.blockchain === 'ripple' ?
-
-                    <XrpModal lookXrpPrice={look.cryptoPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} /> :
-                    ""
-                  }
-
-                  {look.blockchain === 'near' ?
-
-                    <NearModal lookNearPrice={look.cryptoPrice} lookImage={look.medias} lookId={look.id || look.objectId} lookName={look.name} cryptoReceiver={look.cryptoReceiver} /> :
-                    ""
-                  }
-                  {look.blockchain === 'stellar' ?
-
-                    <XlmModal
-                      lookCryptoPrice={look.cryptoPrice || look.price}
-                      lookImage={look.medias}
-                      lookId={look.id || look.objectId}
-                      lookName={look.name}
-                    /> :
-                    ""
-                  }
                   {look.blockchain === 'haqq' ?
 
                     <IslmModal

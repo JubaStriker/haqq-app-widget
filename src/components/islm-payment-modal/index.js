@@ -23,7 +23,6 @@ import {
     useToast,
     Link
 } from "@chakra-ui/react";
-import useXRPStore from "../../store/xrpl";
 import useCouponsStore from "../../store/coupons";
 import { ShopContext } from "../../context";
 import { useSDK } from '@metamask/sdk-react';
@@ -85,13 +84,10 @@ const IslmModal = (props) => {
     );
 
     const { couponState, getCouponAction, storePaymentTxId } = useCouponsStore((state) => state);
-    const resetXRPPaymentState = useXRPStore(
-        (state) => state.resetXRPPaymentState
-    );
+
     const toast = useToast();
 
     const onModalClose = () => {
-        resetXRPPaymentState();
         onClose();
     };
 
